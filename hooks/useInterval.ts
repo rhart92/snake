@@ -1,21 +1,28 @@
 import React, { useState, useEffect, useRef } from "react";
 
-export function useInterval(callback: () => void, delay: number) {
-  const savedCallback = useRef<() => void>();
+export function useInterval(callback: () => void, delay?: number) {
+  const fn = useRef(callback);
 
-  // Remember the latest callback.
+  // Still not sure why we need a `useEffect`, but technically feels
+  // side-effecty so maybe this makes sense, but this should update the ref on
+  // any changes.
   useEffect(() => {
-    savedCallback.current = callback;
+    fn.current = callback;
   }, [callback]);
 
-  // Set up the interval.
   useEffect(() => {
     function tick() {
-      savedCallback.current && savedCallback.current();
+      fn.current();
     }
 
-    if (delay !== null) {
-      let id = setInterval(tick, delay);
+		// Only setup a timer if we have a delay
+    if (typeof delay !== 'undefined') {
+      const id = setInterval(() => {
+        tick();
+      }, delay);
+
+      // Clean up
+			// Conditional clean up?
       return () => clearInterval(id);
     }
   }, [delay]);
