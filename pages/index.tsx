@@ -1,3 +1,4 @@
+// TODO: Touch events would be cool!
 import _ from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { useInterval } from "../hooks/useInterval";
@@ -217,7 +218,7 @@ const keyToDirectionMap: Record<string, Direction> = {
 };
 
 export default function Home() {
-  const [points, setPoints] = useState(0);
+  const [points, setPoints] = useState<number | undefined>(undefined);
 
   // Could have a live grid dimensions to make it even harder? Like a heart beat
   // shrinking and growing 🤔
@@ -244,7 +245,7 @@ export default function Home() {
   // Maybe useCallback?
   function eatFood(updatedSnake: Array<Position>) {
     setFood(getFoodPosition(updatedSnake, gridDimensions));
-    setPoints(points + 1);
+    setPoints(points ? points + 1 : 1);
   }
 
   const moveSnake = useCallback(() => {
@@ -273,8 +274,8 @@ export default function Home() {
       snakePositions.size !== newSnake.length
     ) {
       setFail(true);
-      if (points > highScore) {
-        setHighScore(points);
+      if ((points || 0) > highScore) {
+        setHighScore(points || 0);
       }
     } else {
       if (food.x === head.x && food.y === head.y) {
@@ -376,6 +377,7 @@ export default function Home() {
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
+        fontFamily: "monospace",
       }}
     >
       <Grid
@@ -384,7 +386,7 @@ export default function Home() {
         current={snake}
         food={food}
       />
-      <span>Points: {points}</span>
+      <span style={{ marginTop: 10 }}>Points: {(points || 0) * 5}</span>
     </div>
   ) : (
     <div
@@ -395,11 +397,27 @@ export default function Home() {
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
+        fontFamily: "monospace",
       }}
     >
-      <div>This round: {points}</div>
-      <div style={{ marginBottom: 20 }}>High Score: {highScore}</div>
-      <button onClick={() => reset()}>Start!</button>
+      {points !== undefined && <div>This round: {(points || 0) * 5}</div>}
+      {Boolean(highScore) && (
+        <div style={{ marginBottom: 20 }}>High Score: {highScore * 5}</div>
+      )}
+      <button
+			style={{
+					color: "black",
+          border: "1px solid black",
+          background: "white",
+          padding: "7px 9px",
+					fontFamily: "monospace",
+					borderRadius: 5
+        }}
+        onClick={() => reset()}
+      >
+        Click here to start!
+      </button>
+      <div style={{ color: "#999" }}>Or press enter ⌨️</div>
     </div>
   );
 }
